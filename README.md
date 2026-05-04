@@ -1,4 +1,4 @@
-# COMP3000
+# Delve Keeper
 
 A Unity project for COMP3000.
 
@@ -32,9 +32,6 @@ cd COMP3000
    - Click "Open" and navigate to the `COMP3000` folder
    - Wait for Unity to load the project
 
-## Usage
-
-Instructions for how to use the project or run the game.
 
 ## Project Structure
 
@@ -44,10 +41,3 @@ Instructions for how to use the project or run the game.
 - `Assets/Prefabs/` - Reusable prefabs
 - `ProjectSettings/` - Unity project configuration
 
-## Contributing
-
-Guidelines for contributing to the project.
-
-## License
-
-License information goes here.
