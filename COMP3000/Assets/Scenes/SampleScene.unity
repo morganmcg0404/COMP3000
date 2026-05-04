@@ -3274,6 +3274,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 944618949}
   m_CullTransparentMesh: 1
+--- !u!1 &1100223162
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1100223163}
+  m_Layer: 0
+  m_Name: FishingSpots
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1100223163
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100223162}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.68837, y: 0.28226, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1185813978
 GameObject:
   m_ObjectHideFlags: 0
@@ -3580,6 +3611,7 @@ MonoBehaviour:
   attemptDuration: 4
   baseSuccessChance: 0.33
   fishingRange: 2
+  minTimeBetweenRangeChecks: 1
 --- !u!4 &1486570800
 Transform:
   m_ObjectHideFlags: 0
@@ -5222,15 +5254,30 @@ PrefabInstance:
       propertyPath: miningSystem
       value: 
       objectReference: {fileID: 1374527899}
+    - target: {fileID: 6961123502667202923, guid: 73e0770f47c92ad4bbd5d1940cb507b5,
+        type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8872051158107861134, guid: 73e0770f47c92ad4bbd5d1940cb507b5,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 8872051158107861134, guid: 73e0770f47c92ad4bbd5d1940cb507b5,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8872051158107861134, guid: 73e0770f47c92ad4bbd5d1940cb507b5,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.5
+      value: 2.35
       objectReference: {fileID: 0}
     - target: {fileID: 8872051158107861134, guid: 73e0770f47c92ad4bbd5d1940cb507b5,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.5
+      value: 6.31
       objectReference: {fileID: 0}
     - target: {fileID: 8872051158107861134, guid: 73e0770f47c92ad4bbd5d1940cb507b5,
         type: 3}
@@ -5370,13 +5417,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5358404397135721742, guid: cab7b0952c04ad0469dac921fae551b8,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 5358404397135721742, guid: cab7b0952c04ad0469dac921fae551b8,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5358404397135721742, guid: cab7b0952c04ad0469dac921fae551b8,
+        type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.5
+      value: -5.5
       objectReference: {fileID: 0}
     - target: {fileID: 5358404397135721742, guid: cab7b0952c04ad0469dac921fae551b8,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.5
+      value: 2.45
       objectReference: {fileID: 0}
     - target: {fileID: 5358404397135721742, guid: cab7b0952c04ad0469dac921fae551b8,
         type: 3}
@@ -5391,17 +5448,17 @@ PrefabInstance:
     - target: {fileID: 5358404397135721742, guid: cab7b0952c04ad0469dac921fae551b8,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 5358404397135721742, guid: cab7b0952c04ad0469dac921fae551b8,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 5358404397135721742, guid: cab7b0952c04ad0469dac921fae551b8,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 5358404397135721742, guid: cab7b0952c04ad0469dac921fae551b8,
         type: 3}
@@ -5417,6 +5474,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6781985085987602767, guid: cab7b0952c04ad0469dac921fae551b8,
+        type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9203990733107014706, guid: cab7b0952c04ad0469dac921fae551b8,
         type: 3}
@@ -5444,8 +5506,9 @@ SceneRoots:
   - {fileID: 1185813980}
   - {fileID: 653766041031544857}
   - {fileID: 3206788067819413576}
-  - {fileID: 1374527900}
+  - {fileID: 1100223163}
   - {fileID: 7023620657253680691}
+  - {fileID: 1374527900}
   - {fileID: 1486570800}
   - {fileID: 1843887234}
   - {fileID: 1790376896}

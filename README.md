@@ -4,13 +4,13 @@ A Unity project for COMP3000.
 
 ## Description
 
-Brief description of the project goes here.
+Delve Keeper is a Unity-based single-player RPG dungeon crawler prototype focused on progression-driven gameplay, combining combat, skilling, crafting, and equipment systems to create a rewarding long-term player experience.
 
 ## Features
 
-- Feature 1
-- Feature 2
-- Feature 3
+- Grid Based Movement System
+- Tick Based Combat System
+- Skill Progression
 
 ## Getting Started
 

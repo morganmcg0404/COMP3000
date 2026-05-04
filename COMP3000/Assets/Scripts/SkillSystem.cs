@@ -166,6 +166,20 @@ public class SkillSystem : MonoBehaviour
         float adjustedExp = expAmount * skillingExpMultiplier;
         miningSkill.AddExperience(adjustedExp);
         Debug.Log($"Ore mined! Gained {adjustedExp} Mining exp");
+
+        // Show XP drop
+        if (xpDropPrefab == null)
+        {
+            Debug.LogWarning("SkillSystem: XP drop prefab not assigned!");
+            return;
+        }
+
+        GameObject xpDropCanvas = Instantiate(xpDropPrefab);
+        XPDrop xpDrop = xpDropCanvas.GetComponentInChildren<XPDrop>();
+        if (xpDrop != null)
+        {
+            xpDrop.Initialize((int)adjustedExp, "Mining");
+        }
     }
 
     public void OnFishCaught(float expAmount)
@@ -173,6 +187,20 @@ public class SkillSystem : MonoBehaviour
         float adjustedExp = expAmount * skillingExpMultiplier;
         fishingSkill.AddExperience(adjustedExp);
         Debug.Log($"Fish caught! Gained {adjustedExp} Fishing exp");
+
+        // Show XP drop
+        if (xpDropPrefab == null)
+        {
+            Debug.LogWarning("SkillSystem: XP drop prefab not assigned!");
+            return;
+        }
+
+        GameObject xpDropCanvas = Instantiate(xpDropPrefab);
+        XPDrop xpDrop = xpDropCanvas.GetComponentInChildren<XPDrop>();
+        if (xpDrop != null)
+        {
+            xpDrop.Initialize((int)adjustedExp, "Fishing");
+        }
     }
 
     public void OnItemSmithed(float expAmount)

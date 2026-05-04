@@ -13,20 +13,22 @@ public class FishingSystem : MonoBehaviour
     [SerializeField] private float tickDuration = 0.6f;
     [SerializeField] private int attemptDuration = 4;
     [SerializeField] private float baseSuccessChance = 0.33f;
-    [SerializeField] private int fishingRange = 2;
+    [SerializeField] private int fishingRange = 3;
+    [SerializeField] private float minTimeBetweenRangeChecks = 1f;
 
     private bool isFishing = false;
     private Coroutine fishingCoroutine;
     private FishingSpot currentSpot;
+    private float fishingStartTime = 0f;
 
     private FishData[] fishData = new FishData[]
     {
-        new FishData("Raw Shrimp", 1, "raw_shrimp", 10),
-        new FishData("Raw Anchovy", 15, "raw_anchovy", 20),
-        new FishData("Raw Herring", 30, "raw_herring", 30),
-        new FishData("Raw Salmon", 45, "raw_salmon", 40),
-        new FishData("Raw Tuna", 60, "raw_tuna", 50),
-        new FishData("Raw Swordfish", 75, "raw_swordfish", 60)
+        new FishData("Raw Shrimp", 1, "raw_shrimp", 100),
+        new FishData("Raw Anchovy", 15, "raw_anchovy", 100),
+        new FishData("Raw Herring", 30, "raw_herring", 100),
+        new FishData("Raw Salmon", 45, "raw_salmon", 100),
+        new FishData("Raw Tuna", 60, "raw_tuna", 100),
+        new FishData("Raw Swordfish", 75, "raw_swordfish", 100)
     };
 
     public bool IsFishing => isFishing;
@@ -53,14 +55,19 @@ public class FishingSystem : MonoBehaviour
     {
         if (isFishing && currentSpot != null && gridManager != null && playerController != null)
         {
-            Vector3Int playerPos = playerController.CurrentGridPosition;
-            Vector3Int spotPos = gridManager.WorldToGrid(currentSpot.transform.position);
-            int distanceToSpot = GetManhattanDistance(playerPos, spotPos);
-
-            if (distanceToSpot > fishingRange)
+            // Only check range after minimum time has passed to allow player to settle into position
+            if (Time.time - fishingStartTime >= minTimeBetweenRangeChecks)
             {
-                Debug.Log("Walked too far from fishing spot! Stopping fishing.");
-                StopFishing();
+                Vector3Int playerPos = playerController.CurrentGridPosition;
+                Vector3 adjustedSpotPos = currentSpot.transform.position - new Vector3(0.5f, 0.5f, 0);
+                Vector3Int spotPos = gridManager.WorldToGrid(adjustedSpotPos);
+                int distanceToSpot = GetManhattanDistance(playerPos, spotPos);
+
+                if (distanceToSpot > fishingRange)
+                {
+                    Debug.Log($"Walked too far from fishing spot! Distance: {distanceToSpot}, Range: {fishingRange}. Stopping fishing.");
+                    StopFishing();
+                }
             }
         }
     }
@@ -99,6 +106,7 @@ public class FishingSystem : MonoBehaviour
         }
 
         currentSpot = spot;
+        fishingStartTime = Time.time;
         Debug.Log($"<color=cyan>Starting to fish for {fish.name}...</color>");
 
         if (fishingCoroutine != null)

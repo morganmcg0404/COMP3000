@@ -13,20 +13,22 @@ public class MiningSystem : MonoBehaviour
     [SerializeField] private float tickDuration = 0.6f;
     [SerializeField] private int attemptDuration = 4;
     [SerializeField] private float baseSuccessChance = 0.33f;
-    [SerializeField] private int miningRange = 2;
+    [SerializeField] private int miningRange = 3;
+    [SerializeField] private float minTimeBetweenRangeChecks = 1f;
 
     private bool isMining = false;
     private Coroutine miningCoroutine;
     private OreRock currentRock;
+    private float miningStartTime = 0f;
 
     private OreData[] oreData = new OreData[]
     {
-        new OreData("Copper Ore", 1, "copper_ore", 10),
-        new OreData("Tin Ore", 15, "tin_ore", 20),
-        new OreData("Iron Ore", 30, "iron_ore", 30),
-        new OreData("Gold Ore", 45, "gold_ore", 40),
-        new OreData("Mithril Ore", 60, "mithril_ore", 50),
-        new OreData("Adamantite Ore", 75, "adamantite_ore", 60)
+        new OreData("Copper Ore", 1, "copper_ore", 100),
+        new OreData("Tin Ore", 15, "tin_ore", 100),
+        new OreData("Iron Ore", 30, "iron_ore", 100),
+        new OreData("Gold Ore", 45, "gold_ore", 100),
+        new OreData("Mithril Ore", 60, "mithril_ore", 100),
+        new OreData("Adamantite Ore", 75, "adamantite_ore", 100)
     };
 
     public bool IsMining => isMining;
@@ -53,14 +55,19 @@ public class MiningSystem : MonoBehaviour
     {
         if (isMining && currentRock != null && gridManager != null && playerController != null)
         {
-            Vector3Int playerPos = playerController.CurrentGridPosition;
-            Vector3Int orePos = gridManager.WorldToGrid(currentRock.transform.position);
-            int distanceToOre = GetManhattanDistance(playerPos, orePos);
-
-            if (distanceToOre > miningRange)
+            // Only check range after minimum time has passed to allow player to settle into position
+            if (Time.time - miningStartTime >= minTimeBetweenRangeChecks)
             {
-                Debug.Log("Walked too far from ore! Stopping mining.");
-                StopMining();
+                Vector3Int playerPos = playerController.CurrentGridPosition;
+                Vector3 adjustedOrePos = currentRock.transform.position - new Vector3(0.5f, 0.5f, 0);
+                Vector3Int orePos = gridManager.WorldToGrid(adjustedOrePos);
+                int distanceToOre = GetManhattanDistance(playerPos, orePos);
+
+                if (distanceToOre > miningRange)
+                {
+                    Debug.Log($"Walked too far from ore! Distance: {distanceToOre}, Range: {miningRange}. Stopping mining.");
+                    StopMining();
+                }
             }
         }
     }
@@ -99,6 +106,7 @@ public class MiningSystem : MonoBehaviour
         }
 
         currentRock = rock;
+        miningStartTime = Time.time;
         Debug.Log($"<color=cyan>Starting to mine {ore.name}...</color>");
 
         if (miningCoroutine != null)

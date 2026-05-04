@@ -58,10 +58,10 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!114 &2020907967005710046
 MonoBehaviour:
@@ -75,10 +75,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -131,6 +131,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: XPDrop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1617561880777424486, guid: 4d3b548dec520384aad0f4a74138a8e3,
+        type: 3}
+      propertyPath: m_text
+      value: +100 (Combat)
       objectReference: {fileID: 0}
     - target: {fileID: 7882547090893580756, guid: 4d3b548dec520384aad0f4a74138a8e3,
         type: 3}
@@ -210,12 +215,12 @@ PrefabInstance:
     - target: {fileID: 7882547090893580756, guid: 4d3b548dec520384aad0f4a74138a8e3,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 205
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 7882547090893580756, guid: 4d3b548dec520384aad0f4a74138a8e3,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 125
+      value: 275
       objectReference: {fileID: 0}
     - target: {fileID: 7882547090893580756, guid: 4d3b548dec520384aad0f4a74138a8e3,
         type: 3}

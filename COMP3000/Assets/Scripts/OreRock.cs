@@ -72,18 +72,35 @@ public class OreRock : MonoBehaviour
 
     private IEnumerator PathToAndMinOre()
     {
-        Vector3Int oreGridPos = gridManager.WorldToGrid(transform.position);
+        // Subtract 0.5 offset from ore position to get true grid position
+        Vector3 adjustedOrePos = transform.position - new Vector3(0.5f, 0.5f, 0);
+        Vector3Int oreGridPos = gridManager.WorldToGrid(adjustedOrePos);
+        Vector3Int playerPos = playerController.CurrentGridPosition;
+        
+        Debug.Log($"=== MINING DEBUG ===");
+        Debug.Log($"Ore adjusted position: {adjustedOrePos}, grid: {oreGridPos}");
+        Debug.Log($"Player position: {playerController.transform.position}, grid: {playerPos}");
+        
         Vector3Int nearestAdjacentTile = FindNearestAdjacentTile(oreGridPos);
 
+        Debug.Log($"Nearest adjacent tile: {nearestAdjacentTile}");
+        
         if (nearestAdjacentTile == Vector3Int.zero)
         {
             Debug.LogWarning("Could not find walkable tile adjacent to ore rock!");
             yield break;
         }
 
+        // If the nearest adjacent tile is the player's current position, start mining immediately
+        if (nearestAdjacentTile == playerPos)
+        {
+            Debug.Log("Player already on adjacent tile, starting mining");
+            miningSystem.StartMining(oreIndex, this);
+            yield break;
+        }
+
         Debug.Log($"Pathing to adjacent tile {nearestAdjacentTile}");
 
-        Vector3Int playerPos = playerController.CurrentGridPosition;
         var currentPath = pathfinder.FindPath(playerPos, nearestAdjacentTile, gridManager);
 
         if (currentPath == null || currentPath.Count == 0)
@@ -92,54 +109,69 @@ public class OreRock : MonoBehaviour
             yield break;
         }
 
+        Debug.Log($"Path found with {currentPath.Count} tiles");
+
         playerController.MoveTo(nearestAdjacentTile);
 
-        while (playerController.CurrentGridPosition != nearestAdjacentTile)
+        // Wait for player to reach the adjacent tile (with timeout)
+        float timeout = 0f;
+        while (playerController.CurrentGridPosition != nearestAdjacentTile && timeout < 30f)
         {
+            timeout += Time.deltaTime;
             yield return null;
         }
 
-        Debug.Log($"Player reached adjacent tile, starting to mine {GetOreName()}");
+        if (playerController.CurrentGridPosition != nearestAdjacentTile)
+        {
+            Debug.LogWarning("Player did not reach adjacent tile in time!");
+            yield break;
+        }
+
+        Debug.Log($"Player reached adjacent tile {nearestAdjacentTile}, starting to mine {GetOreName()}");
         miningSystem.StartMining(oreIndex, this);
     }
 
     private Vector3Int FindNearestAdjacentTile(Vector3Int orePos)
     {
-        Vector3Int closestTile = Vector3Int.zero;
-        float closestDistance = float.MaxValue;
-
-        Vector3Int[] adjacentOffsets = new Vector3Int[]
+        Vector3Int playerGridPos = playerController.CurrentGridPosition;
+        
+        // Only check cardinal directions (up, down, left, right)
+        Vector3Int[] cardinalOffsets = new Vector3Int[]
         {
-            new Vector3Int(1, 0, 0),
-            new Vector3Int(-1, 0, 0),
-            new Vector3Int(0, 1, 0),
-            new Vector3Int(0, -1, 0)
+            new Vector3Int(1, 0, 0),   // Right
+            new Vector3Int(-1, 0, 0),  // Left
+            new Vector3Int(0, 1, 0),   // Up
+            new Vector3Int(0, -1, 0)   // Down
         };
 
-        Vector3Int playerGridPos = playerController.CurrentGridPosition;
+        // First check if player is already on any cardinal adjacent tile
+        foreach (Vector3Int offset in cardinalOffsets)
+        {
+            Vector3Int checkPos = orePos + offset;
+            if (checkPos == playerGridPos)
+            {
+                Debug.Log($"Player already on adjacent tile {checkPos}");
+                return checkPos;
+            }
+        }
 
-        foreach (Vector3Int offset in adjacentOffsets)
+        // Find the closest walkable cardinal tile
+        Vector3Int closestTile = Vector3Int.zero;
+        float closestDistance = float.MaxValue;
+        
+        foreach (Vector3Int offset in cardinalOffsets)
         {
             Vector3Int checkPos = orePos + offset;
 
-            if (checkPos == orePos)
-                continue;
-
-            if (gridManager.IsTileWalkable(checkPos) && checkPos != orePos)
+            if (gridManager.IsTileWalkable(checkPos))
             {
                 float distanceToPlayer = Vector3Int.Distance(checkPos, playerGridPos);
-
                 if (distanceToPlayer < closestDistance)
                 {
                     closestDistance = distanceToPlayer;
                     closestTile = checkPos;
                 }
             }
-        }
-
-        if (closestTile == Vector3Int.zero)
-        {
-            Debug.LogWarning($"No walkable tile found adjacent to ore at {orePos}");
         }
 
         return closestTile;

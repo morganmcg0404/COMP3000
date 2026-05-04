@@ -71,16 +71,22 @@ public class InventoryUI : MonoBehaviour
         slotUIs = new InventorySlotUI[playerInventory.MaxSlots];
 
         for (int i = 0; i < playerInventory.MaxSlots; i++)
-        {
-            GameObject slotObj = Instantiate(slotPrefab, slotContainer);
-            InventorySlotUI slotUI = slotObj.GetComponent<InventorySlotUI>();
+{
+    GameObject slotObj = Instantiate(slotPrefab, slotContainer);
 
-            if (slotUI != null)
-            {
-                slotUI.Initialize(playerInventory.GetSlot(i), i);
-                slotUIs[i] = slotUI;
-            }
-        }
+    // 👇 Try get component
+    InventorySlotUI slotUI = slotObj.GetComponent<InventorySlotUI>();
+
+    // 👇 If missing, add it automatically
+    if (slotUI == null)
+    {
+        slotUI = slotObj.AddComponent<InventorySlotUI>();
+    }
+
+    // 👇 Now it's guaranteed to exist
+    slotUI.Initialize(playerInventory.GetSlot(i), i);
+    slotUIs[i] = slotUI;
+}
 
         RefreshAllSlots();
     }

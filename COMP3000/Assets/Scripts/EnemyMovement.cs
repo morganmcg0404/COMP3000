@@ -99,9 +99,6 @@ public class EnemyMovement : MonoBehaviour
         spawnPos.y += yOffset;
         transform.position = spawnPos;
 
-        Debug.Log($"{gameObject.name} spawned at grid position {spawnPoint}");
-        Debug.Log($"{gameObject.name} Y position: {transform.position.y}");
-
         // Start wandering
         StartWandering();
     }
@@ -124,7 +121,6 @@ public class EnemyMovement : MonoBehaviour
                 if (distanceToPlayer > aggressionRange)
                 {
                     // Player ran too far, return to spawn and cancel combat
-                    Debug.Log($"{enemy.EnemyName} lost aggro - player too far away! Distance: {distanceToPlayer} > {aggressionRange}");
                     SetState(EnemyState.ReturningToSpawn);
                     enemy.SetInCombat(false);
                     
@@ -198,7 +194,6 @@ public class EnemyMovement : MonoBehaviour
                 if (missingHealth > 0)
                 {
                     enemy.Heal(missingHealth);
-                    Debug.Log($"<color=green>{enemy.EnemyName} HP reset to full at spawn point!</color>");
                 }
                 hasResetHP = true;
             }
@@ -294,7 +289,6 @@ public class EnemyMovement : MonoBehaviour
     /// </summary>
     public void ReturnToSpawn()
     {
-        Debug.Log($"{gameObject.name} returning to spawn at {spawnPoint}");
         StopWandering();
         
         // Stop current movement and reset isMoving flag
@@ -321,26 +315,18 @@ public class EnemyMovement : MonoBehaviour
 
         if (isMoving)
         {
-            Debug.LogWarning($"EnemyMovement: Already moving! Current pos: {currentGridPosition}, Target: {targetPosition}");
             return;
         }
-
-        Debug.Log($"{gameObject.name} pathfinding from {currentGridPosition} to {targetPosition}");
 
         // Find path
         currentPath = pathfinder.FindPath(currentGridPosition, targetPosition, gridManager);
 
         if (currentPath != null && currentPath.Count > 0)
         {
-            Debug.Log($"Found path with {currentPath.Count} steps");
             if (moveCoroutine != null)
                 StopCoroutine(moveCoroutine);
             
             moveCoroutine = StartCoroutine(FollowPath());
-        }
-        else
-        {
-            Debug.LogWarning($"No path found from {currentGridPosition} to {targetPosition}");
         }
     }
 
