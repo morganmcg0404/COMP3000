@@ -36,11 +36,17 @@ public class CombatSystem : MonoBehaviour
     private Coroutine combatCoroutine;
     private PlayerController playerController;
 
-    void Start()
+    void Awake()
     {
+        InitializeCombat();
+    }
+
+    public void InitializeCombat()
+    {
+        // Find references
         if (skillSystem == null)
             skillSystem = FindFirstObjectByType<SkillSystem>();
-        
+
         if (playerEquipment == null)
             playerEquipment = FindFirstObjectByType<PlayerEquipment>();
 
@@ -48,6 +54,28 @@ public class CombatSystem : MonoBehaviour
             gridManager = FindFirstObjectByType<GridManager>();
 
         if (playerController == null)
+            playerController = FindFirstObjectByType<PlayerController>();
+
+        // Initialize combat state
+        playerCurrentHealth = playerMaxHealth;
+        isInCombat = false;
+        currentTarget = null;
+        playerTicksUntilNextAttack = 0;
+        enemyTicksUntilNextAttack = 0;
+        playerHealthRegenTicks = 0;
+
+        Debug.Log("CombatSystem initialized");
+    }
+
+    // Public method to update GridManager reference when scenes change
+    public void UpdateGridManager()
+    {
+        gridManager = FindFirstObjectByType<GridManager>();
+        Debug.Log($"CombatSystem GridManager updated: {gridManager != null}");
+    }
+
+    void Start()
+    {
             playerController = FindFirstObjectByType<PlayerController>();
 
         // Calculate max health based on health skill level
@@ -72,37 +100,73 @@ public class CombatSystem : MonoBehaviour
         if (playerHealthBar == null && playerHealthBarPrefab != null)
         {
             Debug.Log("Spawning player health bar from prefab...");
-            // Find the main UI Canvas (screen-space)
-            Canvas[] allCanvases = FindObjectsOfType<Canvas>();
-            Canvas screenSpaceCanvas = null;
-            foreach (Canvas c in allCanvases)
-            {
-                if (c.renderMode == RenderMode.ScreenSpaceOverlay || c.renderMode == RenderMode.ScreenSpaceCamera)
-                {
-                    screenSpaceCanvas = c;
-                    break;
-                }
-            }
             
-            Debug.Log($"Screen-space Canvas found: {screenSpaceCanvas != null}");
-            if (screenSpaceCanvas != null)
+            // Find the player GameObject (which persists across scenes)
+            PlayerController playerController = FindFirstObjectByType<PlayerController>();
+            GameObject playerObject = null;
+            
+            if (playerController != null)
             {
-                GameObject healthBarObj = Instantiate(playerHealthBarPrefab, screenSpaceCanvas.transform);
-                playerHealthBar = healthBarObj.GetComponent<HealthBar>();
-                Debug.Log($"Player health bar instantiated: {healthBarObj.name}");
-                
-                if (playerHealthBar == null)
-                {
-                    Debug.LogError("Player health bar prefab doesn't have HealthBar component!");
-                }
-                else
-                {
-                    Debug.Log("Player health bar successfully spawned!");
-                }
+                playerObject = playerController.gameObject;
+                Debug.Log($"Found player object: {playerObject.name}");
             }
             else
             {
-                Debug.LogError("No screen-space Canvas found in scene for player health bar!");
+                Debug.LogError("PlayerController not found! Cannot create persistent health bar canvas.");
+            }
+            
+            if (playerObject != null)
+            {
+                // Find or create a persistent canvas as child of player
+                Transform healthBarCanvasTransform = playerObject.transform.Find("HealthBarCanvas");
+                Canvas healthBarCanvas = null;
+                
+                if (healthBarCanvasTransform != null)
+                {
+                    healthBarCanvas = healthBarCanvasTransform.GetComponent<Canvas>();
+                    Debug.Log("Found existing HealthBarCanvas on player");
+                }
+                else
+                {
+                    // Create new canvas as child of player
+                    GameObject canvasObj = new GameObject("HealthBarCanvas");
+                    canvasObj.transform.SetParent(playerObject.transform);
+                    canvasObj.transform.localPosition = Vector3.zero;
+                    canvasObj.transform.localRotation = Quaternion.identity;
+                    canvasObj.transform.localScale = Vector3.one;
+                    
+                    healthBarCanvas = canvasObj.AddComponent<Canvas>();
+                    healthBarCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                    
+                    // Configure CanvasScaler to scale with screen size
+                    UnityEngine.UI.CanvasScaler canvasScaler = canvasObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+                    canvasScaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                    canvasScaler.referenceResolution = new Vector2(800, 600); // Reference resolution for scaling
+                    canvasScaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                    canvasScaler.matchWidthOrHeight = 0f; // Match width primarily
+                    
+                    canvasObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+                    
+                    // Mark as DontDestroyOnLoad since it's a child of the persistent player
+                    DontDestroyOnLoad(canvasObj);
+                    Debug.Log("Created new HealthBarCanvas on player with screen size scaling and marked as DontDestroyOnLoad");
+                }
+                
+                if (healthBarCanvas != null)
+                {
+                    GameObject healthBarObj = Instantiate(playerHealthBarPrefab, healthBarCanvas.transform);
+                    playerHealthBar = healthBarObj.GetComponent<HealthBar>();
+                    Debug.Log($"Player health bar instantiated under persistent canvas: {healthBarObj.name}");
+                    
+                    if (playerHealthBar == null)
+                    {
+                        Debug.LogError("Player health bar prefab doesn't have HealthBar component!");
+                    }
+                    else
+                    {
+                        Debug.Log("Player health bar successfully spawned under persistent canvas!");
+                    }
+                }
             }
         }
         else if (playerHealthBar == null && playerHealthBarPrefab == null)

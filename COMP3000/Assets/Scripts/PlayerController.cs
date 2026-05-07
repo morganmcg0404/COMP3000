@@ -97,6 +97,9 @@ public class PlayerController : MonoBehaviour
         transform.position = gridManager.GridToWorld(currentGridPosition);
         Debug.Log($"Player starting at grid position: {currentGridPosition}, world position: {transform.position}");
         Debug.Log($"Player Y position: {transform.position.y}");
+
+        // Ensure GridManager is properly updated (fallback in case GameManager doesn't call it)
+        UpdateGridManager();
     }
 
     void Update()
@@ -128,8 +131,18 @@ public class PlayerController : MonoBehaviour
         
         if (gridManager == null)
         {
-            Debug.LogError("GridManager is null!");
-            return;
+            Debug.LogWarning("GridManager is null, trying to find it...");
+            gridManager = FindFirstObjectByType<GridManager>();
+            
+            if (gridManager == null)
+            {
+                Debug.LogError("GridManager is still null! Cannot process input.");
+                return;
+            }
+            else
+            {
+                Debug.Log("GridManager found during input processing");
+            }
         }
         
         if (Camera.main == null)
@@ -400,6 +413,95 @@ public class PlayerController : MonoBehaviour
                 return true;
         }
         return false;
+    }
+
+    public void ResetMovement()
+    {
+        // Stop any current movement
+        if (followPathCoroutine != null)
+        {
+            StopCoroutine(followPathCoroutine);
+            followPathCoroutine = null;
+        }
+
+        isMoving = false;
+        currentPath = null;
+
+        // Update grid position based on actual position
+        if (gridManager != null)
+        {
+            Vector3 posNoOffset = transform.position;
+            posNoOffset.y -= 0.5f;
+            currentGridPosition = gridManager.WorldToGrid(posNoOffset);
+            Debug.Log($"PlayerController reset movement. Current grid position: {currentGridPosition}");
+        }
+    }
+
+    // Public method to update GridManager reference when scenes change
+    public void UpdateGridManager()
+    {
+        gridManager = FindFirstObjectByType<GridManager>();
+        Debug.Log($"PlayerController GridManager updated: {gridManager != null}");
+        
+        if (gridManager != null)
+        {
+            // Update current grid position based on actual position
+            Vector3 posNoOffset = transform.position;
+            posNoOffset.y -= 0.5f;
+            currentGridPosition = gridManager.WorldToGrid(posNoOffset);
+            Debug.Log($"PlayerController grid position updated to: {currentGridPosition}");
+
+            // Check if the current position is walkable
+            if (!gridManager.IsTileWalkable(currentGridPosition))
+            {
+                Debug.LogWarning($"Player position {currentGridPosition} is not walkable! Finding nearest walkable tile...");
+
+                // Try to find a nearby walkable position
+                Vector3Int nearestWalkable = FindNearestWalkablePosition(currentGridPosition, 5);
+                if (nearestWalkable != Vector3Int.zero)
+                {
+                    currentGridPosition = nearestWalkable;
+                    Vector3 newWorldPos = gridManager.GridToWorld(currentGridPosition);
+                    transform.position = newWorldPos;
+                    Debug.Log($"Player repositioned to nearest walkable position: {currentGridPosition} at world pos {newWorldPos}");
+                }
+                else
+                {
+                    Debug.LogError("Could not find any walkable position near player! Player may be stuck.");
+                }
+            }
+        }
+    }
+
+    private Vector3Int FindNearestWalkablePosition(Vector3Int startPos, int searchRadius)
+    {
+        // Search in expanding squares around the start position
+        for (int radius = 1; radius <= searchRadius; radius++)
+        {
+            for (int x = -radius; x <= radius; x++)
+            {
+                for (int z = -radius; z <= radius; z++)
+                {
+                    // Only check the perimeter of each square
+                    if (Mathf.Abs(x) == radius || Mathf.Abs(z) == radius)
+                    {
+                        Vector3Int testPos = startPos + new Vector3Int(x, 0, z);
+                        if (gridManager.IsTileWalkable(testPos))
+                        {
+                            return testPos;
+                        }
+                    }
+                }
+            }
+        }
+
+        // If no walkable position found, try the center (in case it's actually walkable)
+        if (gridManager.IsTileWalkable(startPos))
+        {
+            return startPos;
+        }
+
+        return Vector3Int.zero; // No walkable position found
     }
 
     void OnDrawGizmos()

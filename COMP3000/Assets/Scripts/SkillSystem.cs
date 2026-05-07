@@ -58,7 +58,7 @@ public class SkillSystem : MonoBehaviour
         cookingSkill.OnLevelUp -= OnCookingLevelUp;
     }
 
-    private void InitializeSkills()
+    public void InitializeSkills()
     {
         combatSkill = new Skill("Combat", 1, 100);
         healthSkill = new Skill("Health", 10, 100);

@@ -20,9 +20,31 @@ public class EquipmentUI : MonoBehaviour
     private Dictionary<EquipmentSlot, EquipmentSlotUI> slotUIDictionary = new Dictionary<EquipmentSlot, EquipmentSlotUI>();
     private List<TextMeshProUGUI> statDisplays = new List<TextMeshProUGUI>();
 
+    // Public method for GameManager to set the persistent PlayerEquipment
+    public void SetPlayerEquipment(PlayerEquipment equipment)
+    {
+        playerEquipment = equipment;
+        Debug.Log("EquipmentUI received PlayerEquipment from GameManager");
+
+        // Initialize if we already have the equipment
+        if (playerEquipment != null)
+        {
+            SetupEquipmentSlots();
+            SetupStatsDisplay();
+
+            playerEquipment.OnEquipmentChanged += HandleEquipmentChanged;
+            playerEquipment.OnStatsChanged += HandleStatsChanged;
+        }
+    }
+
     void Start()
     {
-        playerEquipment = FindFirstObjectByType<PlayerEquipment>();
+        // Only find PlayerEquipment if not already set by GameManager
+        if (playerEquipment == null)
+        {
+            playerEquipment = FindFirstObjectByType<PlayerEquipment>();
+        }
+
         if (playerEquipment == null)
         {
             Debug.LogError("EquipmentUI: PlayerEquipment not found!");

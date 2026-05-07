@@ -8,8 +8,23 @@ public class SkillMenuUI : MonoBehaviour
     [SerializeField] private Transform skillGrid;
     [SerializeField] private GameObject tooltipPrefab;
 
+    // Public method for GameManager to set the persistent SkillSystem
+    public void SetSkillSystem(SkillSystem system)
+    {
+        skillSystem = system;
+        Debug.Log("SkillMenuUI received SkillSystem from GameManager");
+
+        // Initialize if we already have the system
+        if (skillSystem != null && skillGrid != null)
+        {
+            SetupGridLayout();
+            CreateSkillSlots(null); // Will create tooltip internally
+        }
+    }
+
     void Start()
     {
+        // Only find SkillSystem if not already set by GameManager
         if (skillSystem == null)
             skillSystem = FindFirstObjectByType<SkillSystem>();
 
@@ -27,17 +42,9 @@ public class SkillMenuUI : MonoBehaviour
         SkillTooltip tooltip = null;
         if (tooltipPrefab != null)
         {
-            Canvas mainCanvas = FindFirstObjectByType<Canvas>();
-            if (mainCanvas != null)
-            {
-                GameObject tooltipObj = Instantiate(tooltipPrefab, mainCanvas.transform);
-                tooltip = tooltipObj.GetComponent<SkillTooltip>();
-                Debug.Log("Tooltip prefab instantiated in canvas");
-            }
-            else
-            {
-                Debug.LogError("SkillMenuUI: No Canvas found for tooltip!");
-            }
+            GameObject tooltipObj = Instantiate(tooltipPrefab, skillGrid.parent);
+            tooltip = tooltipObj.GetComponent<SkillTooltip>();
+            Debug.Log("Tooltip prefab instantiated in skills panel");
         }
         else
         {

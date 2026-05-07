@@ -8,6 +8,7 @@ public class MiningSystem : MonoBehaviour
     [SerializeField] private PlayerInventory playerInventory;
     [SerializeField] private GridManager gridManager;
     [SerializeField] private PlayerController playerController;
+    [SerializeField] private InventoryUI inventoryUI;
 
     [Header("Mining Settings")]
     [SerializeField] private float tickDuration = 0.6f;
@@ -49,6 +50,13 @@ public class MiningSystem : MonoBehaviour
 
         if (skillSystem == null)
             Debug.LogWarning("MiningSystem: SkillSystem not found!");
+    }
+
+    // Public method to update GridManager reference when scenes change
+    public void UpdateGridManager()
+    {
+        gridManager = FindFirstObjectByType<GridManager>();
+        Debug.Log($"MiningSystem GridManager updated: {gridManager != null}");
     }
 
     void Update()
@@ -185,10 +193,19 @@ public class MiningSystem : MonoBehaviour
                 Debug.LogWarning("<color=red>Could not add ore to inventory - inventory full!</color>");
                 StopMining();
             }
+            else
+            {
+                // Update UI immediately after adding item
+                if (inventoryUI == null)
+                    inventoryUI = FindFirstObjectByType<InventoryUI>();
+                
+                if (inventoryUI != null)
+                    inventoryUI.RefreshAllSlots();
+            }
         }
         else
         {
-            Debug.Log($"[Would add to inventory: {ore.name}]");
+            Debug.Log($"[MiningSystem] Would add to inventory: {ore.name}");
         }
     }
 

@@ -8,6 +8,7 @@ public class FishingSystem : MonoBehaviour
     [SerializeField] private PlayerInventory playerInventory;
     [SerializeField] private GridManager gridManager;
     [SerializeField] private PlayerController playerController;
+    [SerializeField] private InventoryUI inventoryUI;
 
     [Header("Fishing Settings")]
     [SerializeField] private float tickDuration = 0.6f;
@@ -49,6 +50,13 @@ public class FishingSystem : MonoBehaviour
 
         if (skillSystem == null)
             Debug.LogWarning("FishingSystem: SkillSystem not found!");
+    }
+
+    // Public method to update GridManager reference when scenes change
+    public void UpdateGridManager()
+    {
+        gridManager = FindFirstObjectByType<GridManager>();
+        Debug.Log($"FishingSystem GridManager updated: {gridManager != null}");
     }
 
     void Update()
@@ -185,10 +193,19 @@ public class FishingSystem : MonoBehaviour
                 Debug.LogWarning("<color=red>Could not add fish to inventory - inventory full!</color>");
                 StopFishing();
             }
+            else
+            {
+                // Update UI immediately after adding item
+                if (inventoryUI == null)
+                    inventoryUI = FindFirstObjectByType<InventoryUI>();
+                
+                if (inventoryUI != null)
+                    inventoryUI.RefreshAllSlots();
+            }
         }
         else
         {
-            Debug.Log($"[Would add to inventory: {fish.name}]");
+            Debug.Log($"[FishingSystem] Would add to inventory: {fish.name}");
         }
     }
 

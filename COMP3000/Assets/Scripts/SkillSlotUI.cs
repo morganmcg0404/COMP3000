@@ -93,7 +93,7 @@ public class SkillSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 currentXp,
                 xpForNextLevel,
                 remainingXp,
-                GetComponent<RectTransform>().position
+                GetComponent<RectTransform>()
             );
         }
     }

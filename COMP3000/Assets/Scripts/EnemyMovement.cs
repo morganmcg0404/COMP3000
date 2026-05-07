@@ -103,6 +103,13 @@ public class EnemyMovement : MonoBehaviour
         StartWandering();
     }
 
+    // Public method to update GridManager reference when scenes change
+    public void UpdateGridManager()
+    {
+        gridManager = FindFirstObjectByType<GridManager>();
+        Debug.Log($"EnemyMovement GridManager updated: {gridManager != null}");
+    }
+
     private void UpdateState()
     {
         if (enemy == null || gridManager == null) return;

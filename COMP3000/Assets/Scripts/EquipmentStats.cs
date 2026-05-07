@@ -43,6 +43,38 @@ public struct EquipmentStats
 
     public static EquipmentStats Zero => new EquipmentStats(0, 0, 0);
 
+    public static bool operator ==(EquipmentStats a, EquipmentStats b)
+    {
+        return a.accuracy == b.accuracy && a.defence == b.defence && a.strength == b.strength && a.attackSpeed == b.attackSpeed;
+    }
+
+    public static bool operator !=(EquipmentStats a, EquipmentStats b)
+    {
+        return !(a == b);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is EquipmentStats other)
+        {
+            return this == other;
+        }
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            int hash = 17;
+            hash = hash * 23 + accuracy.GetHashCode();
+            hash = hash * 23 + defence.GetHashCode();
+            hash = hash * 23 + strength.GetHashCode();
+            hash = hash * 23 + attackSpeed.GetHashCode();
+            return hash;
+        }
+    }
+
     public override string ToString()
     {
         return $"Accuracy: {accuracy}, Defence: {defence}, Strength: {strength}";

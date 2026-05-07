@@ -23,7 +23,7 @@ public class PlayerInventory : MonoBehaviour
         InitializeInventory();
     }
 
-    private void InitializeInventory()
+    public void InitializeInventory()
     {
         // If slots already exist, only clear the empty ones (preserve items)
         if (slots != null && slots.Count == maxSlots)
@@ -51,7 +51,8 @@ public class PlayerInventory : MonoBehaviour
         for (int i = 0; i < maxSlots; i++)
         {
             InventorySlot slot = new InventorySlot();
-            slot.OnSlotChanged += () => OnSlotChanged(i);
+            int slotIndex = i; // Capture by value to avoid closure bug
+            slot.OnSlotChanged += () => OnSlotChanged(slotIndex);
             slots.Add(slot);
         }
 

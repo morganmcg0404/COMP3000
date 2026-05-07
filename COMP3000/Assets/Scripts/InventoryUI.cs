@@ -14,21 +14,60 @@ public class InventoryUI : MonoBehaviour
 
     private InventorySlotUI[] slotUIs;
     private CanvasGroup canvasGroup;
+    private bool slotsCreated = false;
 
     void Awake()
     {
-        if (playerInventory == null)
-            playerInventory = FindFirstObjectByType<PlayerInventory>();
-
+        // Don't auto-find PlayerInventory here - let GameManager set it
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null)
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
+    }
 
-        CreateInventorySlots();
+    // Public method for GameManager to set the persistent PlayerInventory
+    public void SetPlayerInventory(PlayerInventory inventory)
+    {
+        playerInventory = inventory;
+        Debug.Log("InventoryUI received PlayerInventory from GameManager");
+
+        // Now that we have the inventory, try to create slots
+        if (playerInventory != null && playerInventory.Slots != null && playerInventory.Slots.Count > 0)
+        {
+            CreateInventorySlots();
+        }
     }
 
     void Start()
     {
+        Debug.Log("<color=cyan>[InventoryUI] Start() called</color>");
+
+        // Only try to find PlayerInventory if not already set by GameManager
+        if (playerInventory == null)
+        {
+            playerInventory = FindFirstObjectByType<PlayerInventory>();
+            Debug.Log("<color=cyan>[InventoryUI] Found PlayerInventory via FindFirstObjectByType</color>");
+        }
+
+        // Create slots in Start() after all Awake() calls are done
+        if (!slotsCreated)
+        {
+            Debug.Log("<color=cyan>[InventoryUI] Creating slots in Start()</color>");
+            CreateInventorySlots();
+            slotsCreated = true;
+        }
+
+        // Subscribe to inventory events
+        if (playerInventory != null)
+        {
+            Debug.Log("<color=cyan>[InventoryUI] Subscribing to inventory events</color>");
+            playerInventory.OnSlotUpdated += UpdateSlot;
+            RefreshAllSlots();
+        }
+        else
+        {
+            Debug.LogError("<color=red>[InventoryUI] PlayerInventory is NULL in Start()!</color>");
+        }
+
         if (!showOnStart)
             Hide();
     }
@@ -37,13 +76,35 @@ public class InventoryUI : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.I))
             Toggle();
+
+        // Check if we need to create slots (PlayerInventory became ready after OnEnable)
+        if (!slotsCreated && playerInventory != null && playerInventory.Slots != null && playerInventory.Slots.Count > 0)
+        {
+            Debug.Log("<color=cyan>[InventoryUI] PlayerInventory became ready in Update(), creating slots now</color>");
+            CreateInventorySlots();
+            slotsCreated = true;
+            RefreshAllSlots();
+        }
     }
 
     void OnEnable()
     {
-        if (playerInventory != null)
+        // Check if PlayerInventory is ready (has slots initialized)
+        if (playerInventory != null && playerInventory.Slots != null && playerInventory.Slots.Count > 0)
         {
-            playerInventory.OnSlotUpdated += UpdateSlot;
+            // Ensure slots are created if they haven't been yet
+            if (!slotsCreated)
+            {
+                CreateInventorySlots();
+                slotsCreated = true;
+            }
+
+            // Refresh UI when inventory panel is opened
+            RefreshAllSlots();
+        }
+        else
+        {
+            // Don't create slots yet - wait for PlayerInventory to initialize
         }
     }
 
@@ -71,22 +132,19 @@ public class InventoryUI : MonoBehaviour
         slotUIs = new InventorySlotUI[playerInventory.MaxSlots];
 
         for (int i = 0; i < playerInventory.MaxSlots; i++)
-{
-    GameObject slotObj = Instantiate(slotPrefab, slotContainer);
+        {
+            GameObject slotObj = Instantiate(slotPrefab, slotContainer);
 
-    // 👇 Try get component
-    InventorySlotUI slotUI = slotObj.GetComponent<InventorySlotUI>();
+            InventorySlotUI slotUI = slotObj.GetComponent<InventorySlotUI>();
 
-    // 👇 If missing, add it automatically
-    if (slotUI == null)
-    {
-        slotUI = slotObj.AddComponent<InventorySlotUI>();
-    }
+            if (slotUI == null)
+            {
+                slotUI = slotObj.AddComponent<InventorySlotUI>();
+            }
 
-    // 👇 Now it's guaranteed to exist
-    slotUI.Initialize(playerInventory.GetSlot(i), i);
-    slotUIs[i] = slotUI;
-}
+            slotUI.Initialize(playerInventory.GetSlot(i), i);
+            slotUIs[i] = slotUI;
+        }
 
         RefreshAllSlots();
     }

@@ -35,8 +35,14 @@ public class PlayerEquipment : MonoBehaviour
 
     public EquipmentStats TotalStats => totalStats;
 
-    void Start()
+    void Awake()
     {
+        InitializeEquipment();
+    }
+
+    public void InitializeEquipment()
+    {
+        // Initialize equipment slots
         helmetSlot = null;
         bodySlot = null;
         legsSlot = null;
@@ -48,21 +54,50 @@ public class PlayerEquipment : MonoBehaviour
         mainHandSlot = null;
         offHandSlot = null;
 
+        // Initialize total stats
+        totalStats = new EquipmentStats();
+
+        Debug.Log("PlayerEquipment initialized");
+    }
+
+    void Start()
+    {
+        // Clear all equipment slots to ensure clean state
+        helmetSlot = null;
+        bodySlot = null;
+        legsSlot = null;
+        handsSlot = null;
+        feetSlot = null;
+        capeSlot = null;
+        ringSlot = null;
+        necklaceSlot = null;
+        mainHandSlot = null;
+        offHandSlot = null;
+
+        Debug.Log("Cleared all equipment slots at start");
+
         // Calculate initial stats from any pre-equipped items
         RecalculateTotalStats();
         Debug.Log($"After null clearing - Stats: {totalStats}");
 
         // If player has no equipment, equip starting gear
-        Debug.Log($"Checking equipment slots - Helmet: {(helmetSlot == null ? "Empty" : "Equipped")}, Body: {(bodySlot == null ? "Empty" : "Equipped")}, Legs: {(legsSlot == null ? "Empty" : "Equipped")}, MainHand: {(mainHandSlot == null ? "Empty" : "Equipped")}, OffHand: {(offHandSlot == null ? "Empty" : "Equipped")}");
+        bool hasValidEquipment = 
+            (helmetSlot != null && helmetSlot.Stats != EquipmentStats.Zero) ||
+            (bodySlot != null && bodySlot.Stats != EquipmentStats.Zero) ||
+            (legsSlot != null && legsSlot.Stats != EquipmentStats.Zero) ||
+            (mainHandSlot != null && mainHandSlot.Stats != EquipmentStats.Zero) ||
+            (offHandSlot != null && offHandSlot.Stats != EquipmentStats.Zero);
         
-        if (helmetSlot == null && bodySlot == null && legsSlot == null && mainHandSlot == null && offHandSlot == null)
+        Debug.Log($"Checking equipment slots - Helmet: {(helmetSlot == null ? "Empty" : helmetSlot.Stats == EquipmentStats.Zero ? "Empty(0 stats)" : "Equipped")}, Body: {(bodySlot == null ? "Empty" : bodySlot.Stats == EquipmentStats.Zero ? "Empty(0 stats)" : "Equipped")}, Legs: {(legsSlot == null ? "Empty" : legsSlot.Stats == EquipmentStats.Zero ? "Empty(0 stats)" : "Equipped")}, MainHand: {(mainHandSlot == null ? "Empty" : mainHandSlot.Stats == EquipmentStats.Zero ? "Empty(0 stats)" : "Equipped")}, OffHand: {(offHandSlot == null ? "Empty" : offHandSlot.Stats == EquipmentStats.Zero ? "Empty(0 stats)" : "Equipped")}");
+        
+        if (!hasValidEquipment)
         {
-            Debug.Log("All slots confirmed null - equipping starting gear");
+            Debug.Log("No valid equipment found - equipping starting gear");
             EquipStartingGear();
         }
         else
         {
-            Debug.Log("Player already has equipment equipped");
+            Debug.Log("Player already has valid equipment equipped");
         }
 
         Debug.Log($"Player Equipment initialized. Total Stats: {totalStats}");
